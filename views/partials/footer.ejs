@@ -1,0 +1,40 @@
+</main>
+    <footer>
+      <p>&copy; 2025 Digital Library Management System. Designed with ❤️ for the future.</p>
+    </footer>
+    
+    <!-- Add smooth scrolling and interactive elements -->
+    <script>
+      // Add loading animation to buttons
+      document.querySelectorAll('.btn, button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          if (!this.classList.contains('loading')) {
+            this.classList.add('loading');
+            setTimeout(() => this.classList.remove('loading'), 1000);
+          }
+        });
+      });
+
+      // Add smooth scroll behavior
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+          });
+        });
+      });
+
+      // Add search functionality enhancement
+      const searchInputs = document.querySelectorAll('.search-input');
+      searchInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          this.parentElement.classList.add('search-focused');
+        });
+        input.addEventListener('blur', function() {
+          this.parentElement.classList.remove('search-focused');
+        });
+      });
+    </script>
+  </body>
+</html>

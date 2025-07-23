@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borrowing Transactions</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="container">
+        <h1>Borrowing Transactions</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Member Name</th>
+                    <th>Book Title</th>
+                    <th>Issue Date</th>
+                    <th>Return Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% transactions.forEach(transaction => { %>
+                    <tr>
+                        <td><%= transaction.id %></td>
+                        <td><%= transaction.memberName %></td>
+                        <td><%= transaction.bookTitle %></td>
+                        <td><%= transaction.issueDate.toLocaleDateString() %></td>
+                        <td><%= transaction.returnDate ? transaction.returnDate.toLocaleDateString() : 'Not Returned' %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

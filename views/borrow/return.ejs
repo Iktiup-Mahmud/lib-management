@@ -1,0 +1,17 @@
+<h1>Return Book</h1>
+<form action="/borrow/return" method="POST">
+    <div>
+        <label for="memberId">Member ID:</label>
+        <input type="text" id="memberId" name="memberId" required>
+    </div>
+    <div>
+        <label for="bookId">Book ID:</label>
+        <input type="text" id="bookId" name="bookId" required>
+    </div>
+    <div>
+        <label for="returnDate">Return Date:</label>
+        <input type="date" id="returnDate" name="returnDate" required>
+    </div>
+    <button type="submit">Return Book</button>
+</form>
+<a href="/borrow/list">Back to Borrowing List</a>

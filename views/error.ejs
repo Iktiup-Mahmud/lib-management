@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Error - Library Management System</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <%- include('partials/header') %>
+
+    <div class="container">
+      <div
+        style="
+          text-align: center;
+          padding: 3rem;
+          background: white;
+          border-radius: 15px;
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+          margin: 2rem 0;
+        "
+      >
+        <h1 style="color: #e74c3c; font-size: 3rem; margin-bottom: 1rem">
+          ⚠️ Error
+        </h1>
+        <h2 style="color: #34495e; margin-bottom: 2rem">
+          <%= message || 'Something went wrong!' %>
+        </h2>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div
+          style="
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            text-align: left;
+          "
+        >
+          <h3 style="color: #e74c3c">Error Details:</h3>
+          <pre
+            style="
+              white-space: pre-wrap;
+              font-family: monospace;
+              color: #6c757d;
+            "
+          >
+<%= error.message || error %></pre
+          >
+        </div>
+        <% } %>
+
+        <div style="margin-top: 2rem">
+          <a href="/dashboard" class="btn">Go to Dashboard</a>
+          <a
+            href="javascript:history.back()"
+            class="btn"
+            style="background: #6c757d"
+            >Go Back</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <%- include('partials/footer') %>
+  </body>
+</html>

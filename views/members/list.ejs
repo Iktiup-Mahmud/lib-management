@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Members List</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('../partials/header.ejs') %>
+
+    <div class="container">
+        <h1>Members List</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% members.forEach(member => { %>
+                    <tr>
+                        <td><%= member.id %></td>
+                        <td><%= member.name %></td>
+                        <td><%= member.email %></td>
+                        <td>
+                            <a href="/members/edit/<%= member.id %>">Edit</a>
+                            <a href="/members/delete/<%= member.id %>">Delete</a>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+        <a href="/members/add" class="btn">Add New Member</a>
+    </div>
+
+    <%- include('../partials/footer.ejs') %>
+</body>
+</html>

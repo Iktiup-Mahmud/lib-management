@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Books List</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <%- include('../partials/header.ejs') %>
+
+    <div class="container">
+      <div class="search-container">
+        <h1>Books List</h1>
+
+        <!-- Success/Error Messages -->
+        <% if (typeof success !== 'undefined') { %>
+        <div class="notification notification-success"><%= success %></div>
+        <% } %> <% if (typeof error !== 'undefined') { %>
+        <div class="notification notification-error"><%= error %></div>
+        <% } %>
+
+        <!-- Search Bar -->
+        <div
+          style="margin: 1rem 0; display: flex; gap: 1rem; align-items: center"
+        >
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search books by title, author, or genre..."
+          />
+          <a href="/books/add" class="btn btn-success">Add New Book</a>
+          <a href="/books/available" class="btn">Available Only</a>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable">ID</th>
+            <th class="sortable">Title</th>
+            <th class="sortable">Author</th>
+            <th class="sortable">Genre</th>
+            <th class="sortable">Published</th>
+            <th class="sortable">ISBN</th>
+            <th class="sortable">Available</th>
+            <th class="sortable">Total</th>
+            <th class="sortable">Price</th>
+            <th class="sortable">Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (books && books.length > 0) { %> <% books.forEach(book => { %>
+          <tr>
+            <td><%= book.id %></td>
+            <td><strong><%= book.title %></strong></td>
+            <td><%= book.author %></td>
+            <td><span class="status borrowed"><%= book.genre %></span></td>
+            <td>
+              <%= book.published_date ? new
+              Date(book.published_date).getFullYear() : 'N/A' %>
+            </td>
+            <td><%= book.isbn || 'N/A' %></td>
+            <td>
+              <span
+                class="status <%= book.available_copies > 0 ? 'available' : 'overdue' %>"
+              >
+                <%= book.available_copies %>
+              </span>
+            </td>
+            <td><%= book.total_copies || 1 %></td>
+            <td>$<%= parseFloat(book.price || 0).toFixed(2) %></td>
+            <td>
+              <% if (book.available_copies > 0) { %>
+              <span class="status available">Available</span>
+              <% } else if (book.currently_borrowed > 0) { %>
+              <span class="status borrowed">All Borrowed</span>
+              <% } else { %>
+              <span class="status overdue">Out of Stock</span>
+              <% } %>
+            </td>
+            <td>
+              <div class="actions">
+                <a
+                  href="/books/<%= book.id %>"
+                  class="btn"
+                  style="
+                    background: #3498db;
+                    color: white;
+                    padding: 5px 10px;
+                    text-decoration: none;
+                    border-radius: 3px;
+                    font-size: 0.8rem;
+                  "
+                  >View</a
+                >
+                <a href="/books/edit/<%= book.id %>" class="edit-link">Edit</a>
+                <a href="/books/delete/<%= book.id %>" class="delete-link"
+                  >Delete</a
+                >
+              </div>
+            </td>
+          </tr>
+          <% }); %> <% } else { %>
+          <tr>
+            <td
+              colspan="11"
+              style="text-align: center; padding: 2rem; color: #6c757d"
+            >
+              No books found. <a href="/books/add">Add the first book</a>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <% if (books && books.length > 0) { %>
+      <div
+        style="
+          margin-top: 2rem;
+          padding: 1rem;
+          background: white;
+          border-radius: 10px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        "
+      >
+        <h3>Library Statistics</h3>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            text-align: center;
+          "
+        >
+          <div>
+            <h4>Total Books</h4>
+            <p style="font-size: 1.5rem; color: #3498db"><%= books.length %></p>
+          </div>
+          <div>
+            <h4>Available</h4>
+            <p style="font-size: 1.5rem; color: #27ae60">
+              <%= books.filter(book => book.available_copies > 0).length %>
+            </p>
+          </div>
+          <div>
+            <h4>Total Copies</h4>
+            <p style="font-size: 1.5rem; color: #e74c3c">
+              <%= books.reduce((sum, book) => sum + (book.total_copies || 0), 0)
+              %>
+            </p>
+          </div>
+          <div>
+            <h4>Total Value</h4>
+            <p style="font-size: 1.5rem; color: #f39c12">
+              $<%= books.reduce((sum, book) => sum + (parseFloat(book.price ||
+              0) * (book.total_copies || 0)), 0).toFixed(2) %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <%- include('../partials/footer.ejs') %>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

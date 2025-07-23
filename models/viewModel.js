@@ -1,0 +1,1 @@
+// This file defines data structures used for rendering views, possibly combining data from multiple models.

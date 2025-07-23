@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Book</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('../partials/header.ejs') %>
+
+    <div class="container">
+        <form action="/books" method="POST">
+            <h1>Add New Book</h1>
+            
+            <% if (typeof error !== 'undefined') { %>
+                <div class="notification notification-error">
+                    <%= error %>
+                </div>
+            <% } %>
+            
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" value="<%= typeof formData !== 'undefined' ? formData.title || '' : '' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="author">Author:</label>
+                <input type="text" id="author" name="author" value="<%= typeof formData !== 'undefined' ? formData.author || '' : '' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="genre">Genre:</label>
+                <select id="genre" name="genre" required>
+                    <option value="">Select Genre</option>
+                    <option value="Fiction" <%= typeof formData !== 'undefined' && formData.genre === 'Fiction' ? 'selected' : '' %>>Fiction</option>
+                    <option value="Non-Fiction" <%= typeof formData !== 'undefined' && formData.genre === 'Non-Fiction' ? 'selected' : '' %>>Non-Fiction</option>
+                    <option value="Science Fiction" <%= typeof formData !== 'undefined' && formData.genre === 'Science Fiction' ? 'selected' : '' %>>Science Fiction</option>
+                    <option value="Romance" <%= typeof formData !== 'undefined' && formData.genre === 'Romance' ? 'selected' : '' %>>Romance</option>
+                    <option value="Mystery" <%= typeof formData !== 'undefined' && formData.genre === 'Mystery' ? 'selected' : '' %>>Mystery</option>
+                    <option value="Biography" <%= typeof formData !== 'undefined' && formData.genre === 'Biography' ? 'selected' : '' %>>Biography</option>
+                    <option value="History" <%= typeof formData !== 'undefined' && formData.genre === 'History' ? 'selected' : '' %>>History</option>
+                    <option value="Science" <%= typeof formData !== 'undefined' && formData.genre === 'Science' ? 'selected' : '' %>>Science</option>
+                    <option value="Fantasy" <%= typeof formData !== 'undefined' && formData.genre === 'Fantasy' ? 'selected' : '' %>>Fantasy</option>
+                    <option value="Adventure" <%= typeof formData !== 'undefined' && formData.genre === 'Adventure' ? 'selected' : '' %>>Adventure</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="publishedDate">Published Date:</label>
+                <input type="date" id="publishedDate" name="publishedDate" value="<%= typeof formData !== 'undefined' ? formData.publishedDate || '' : '' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="isbn">ISBN:</label>
+                <input type="text" id="isbn" name="isbn" value="<%= typeof formData !== 'undefined' ? formData.isbn || '' : '' %>" placeholder="978-0-123456-78-9">
+            </div>
+            
+            <div class="form-group">
+                <label for="total_copies">Total Copies:</label>
+                <input type="number" id="total_copies" name="total_copies" min="1" value="<%= typeof formData !== 'undefined' ? formData.total_copies || '1' : '1' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="available_copies">Available Copies:</label>
+                <input type="number" id="available_copies" name="available_copies" min="0" value="<%= typeof formData !== 'undefined' ? formData.available_copies || '1' : '1' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Price ($):</label>
+                <input type="number" id="price" name="price" min="0" step="0.01" value="<%= typeof formData !== 'undefined' ? formData.price || '0.00' : '0.00' %>">
+            </div>
+            
+            <button type="submit" class="btn btn-success">Add Book</button>
+            <a href="/books" class="btn">Cancel</a>
+        </form>
+    </div>
+
+    <%- include('../partials/footer.ejs') %>
+    <script src="/js/main.js"></script>
+</body>
+</html>
