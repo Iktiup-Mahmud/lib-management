@@ -529,28 +529,8 @@ const Borrow = {
         });
     },
 
-    // ...existing methods like getBorrowingStatistics, getPopularBooks, etc.
-    getBorrowingStatistics: () => {
-        return new Promise((resolve, reject) => {
-            const query = `
-                SELECT 
-                    COUNT(*) as total_transactions,
-                    COUNT(CASE WHEN return_date IS NULL THEN 1 END) as currently_borrowed,
-                    COUNT(CASE WHEN return_date IS NOT NULL THEN 1 END) as returned_books,
-                    COUNT(CASE WHEN return_date IS NULL AND due_date < NOW() THEN 1 END) as overdue_books,
-                    AVG(DATEDIFF(COALESCE(return_date, NOW()), borrow_date)) as avg_borrow_duration,
-                    MAX(borrow_date) as last_borrow_date,
-                    MIN(borrow_date) as first_borrow_date
-                FROM borrow_transactions
-            `;
-            db.query(query, (error, results) => {
-                if (error) return reject(error);
-                resolve(results[0]);
-            });
-        });
-    },
-
-    getPopularBooks: (limit = 10) => {
+    // Get popular books based on borrow frequency
+    getPopularBooks: (limit = 5) => {
         return new Promise((resolve, reject) => {
             const query = `
                 SELECT 
@@ -558,20 +538,41 @@ const Borrow = {
                     b.title,
                     b.author,
                     b.genre,
+                    b.isbn,
                     COUNT(bt.id) as borrow_count,
-                    COUNT(CASE WHEN bt.return_date IS NULL THEN 1 END) as currently_borrowed,
-                    AVG(DATEDIFF(COALESCE(bt.return_date, NOW()), bt.borrow_date)) as avg_borrow_days,
-                    MAX(bt.borrow_date) as last_borrowed
+                    b.available_copies,
+                    b.total_copies
                 FROM books b
                 LEFT JOIN borrow_transactions bt ON b.id = bt.book_id
-                GROUP BY b.id, b.title, b.author, b.genre
-                HAVING borrow_count > 0
-                ORDER BY borrow_count DESC, last_borrowed DESC
+                GROUP BY b.id, b.title, b.author, b.genre, b.isbn, b.available_copies, b.total_copies
+                ORDER BY borrow_count DESC, b.title ASC
                 LIMIT ?
             `;
             db.query(query, [limit], (error, results) => {
                 if (error) return reject(error);
                 resolve(results);
+            });
+        });
+    },
+
+    // Get comprehensive borrowing statistics
+    getBorrowingStatistics: () => {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    COUNT(*) as total_transactions,
+                    COUNT(CASE WHEN return_date IS NULL THEN 1 END) as active_borrowings,
+                    COUNT(CASE WHEN return_date IS NOT NULL THEN 1 END) as completed_returns,
+                    COUNT(CASE WHEN return_date IS NULL AND due_date < NOW() THEN 1 END) as overdue_books,
+                    COALESCE(SUM(fine_amount), 0) as total_fines,
+                    COUNT(CASE WHEN DATE(borrow_date) = CURDATE() THEN 1 END) as today_borrowed,
+                    COUNT(CASE WHEN DATE(return_date) = CURDATE() THEN 1 END) as today_returned,
+                    ROUND(AVG(DATEDIFF(COALESCE(return_date, NOW()), borrow_date)), 1) as avg_borrow_days
+                FROM borrow_transactions
+            `;
+            db.query(query, (error, results) => {
+                if (error) return reject(error);
+                resolve(results[0]);
             });
         });
     },
