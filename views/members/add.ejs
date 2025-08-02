@@ -1,20 +1,649 @@
-<form action="/members" method="POST">
-    <h1>Add New Member</h1>
-    <div>
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> - FutureLib</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .member-form-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      .form-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .form-header h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      .form-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+      }
+
+      .member-form {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 3rem;
+        box-shadow: var(--shadow-glass);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .member-form::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--accent-gradient);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        position: relative;
+      }
+
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .form-label i {
+        color: var(--accent-primary);
+        width: 16px;
+        text-align: center;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        color: var(--text-primary);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+      }
+
+      .form-input.error {
+        border-color: var(--error);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+      }
+
+      .form-input.success {
+        border-color: var(--success);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+      }
+
+      .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        transition: all 0.3s ease;
+        pointer-events: none;
+      }
+
+      .form-group:focus-within .input-icon {
+        color: var(--accent-primary);
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+        padding: 1rem;
+        font-family: inherit;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2.5rem;
+        flex-wrap: wrap;
+      }
+
+      .btn-primary {
+        background: var(--accent-gradient);
+        color: white;
+        border: none;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        min-width: 180px;
+      }
+
+      .btn-primary::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .btn-primary:hover::before {
+        left: 100%;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-secondary);
+        border: 2px solid var(--border-color);
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-secondary:hover {
+        border-color: var(--accent-primary);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+      }
+
+      .error-message {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #ef4444;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideInDown 0.3s ease;
+      }
+
+      .success-preview {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        display: none;
+      }
+
+      .preview-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--success);
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .preview-content {
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      .form-tips {
+        background: rgba(6, 182, 212, 0.15);
+        border: 1px solid rgba(6, 182, 212, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .tips-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--info);
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .tips-list {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      .tips-list li {
+        margin-bottom: 0.5rem;
+      }
+
+      @keyframes slideInDown {
+        from {
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .member-form {
+          padding: 2rem 1.5rem;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+
+        .form-header h1 {
+          font-size: 2rem;
+        }
+
+        .form-actions {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/header.ejs') %>
+
+    <div class="container">
+      <div class="member-form-container">
+        <!-- Form Header -->
+        <div class="form-header">
+          <h1>
+            <i class="fas fa-user-plus"></i>
+            Add New Member
+          </h1>
+          <p>Register a new member to the FutureLib system</p>
+        </div>
+
+        <!-- Error Message -->
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div class="error-message">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <strong>Registration Failed</strong><br />
+            <%= error %>
+          </div>
+        </div>
+        <% } %>
+
+        <!-- Form Tips -->
+        <div class="form-tips">
+          <div class="tips-header">
+            <i class="fas fa-lightbulb"></i>
+            Registration Guidelines
+          </div>
+          <ul class="tips-list">
+            <li>All fields are required for member registration</li>
+            <li>
+              Email address will be used for notifications and account recovery
+            </li>
+            <li>
+              Phone number should include area code for better communication
+            </li>
+            <li>
+              Address helps us serve you better with location-based services
+            </li>
+          </ul>
+        </div>
+
+        <!-- Member Registration Form -->
+        <form
+          class="member-form"
+          action="/members"
+          method="POST"
+          id="memberForm"
+          novalidate
+        >
+          <div class="form-grid">
+            <!-- Full Name -->
+            <div class="form-group">
+              <label class="form-label" for="name">
+                <i class="fas fa-user"></i>
+                Full Name
+              </label>
+              <div style="position: relative">
+                <i class="input-icon fas fa-user"></i>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  class="form-input"
+                  placeholder="Enter full name"
+                  value="<%= typeof formData !== 'undefined' ? formData.name || '' : '' %>"
+                  required
+                  minlength="2"
+                  maxlength="100"
+                />
+              </div>
+            </div>
+
+            <!-- Email Address -->
+            <div class="form-group">
+              <label class="form-label" for="email">
+                <i class="fas fa-envelope"></i>
+                Email Address
+              </label>
+              <div style="position: relative">
+                <i class="input-icon fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="form-input"
+                  placeholder="Enter email address"
+                  value="<%= typeof formData !== 'undefined' ? formData.email || '' : '' %>"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-group">
+              <label class="form-label" for="phone">
+                <i class="fas fa-phone"></i>
+                Phone Number
+              </label>
+              <div style="position: relative">
+                <i class="input-icon fas fa-phone"></i>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  class="form-input"
+                  placeholder="Enter phone number"
+                  value="<%= typeof formData !== 'undefined' ? formData.phone || '' : '' %>"
+                  required
+                  pattern="[0-9+\-\s\(\)]+"
+                />
+              </div>
+            </div>
+
+            <!-- Member ID (Auto-generated, shown for reference) -->
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-id-card"></i>
+                Member ID
+              </label>
+              <div style="position: relative">
+                <i class="input-icon fas fa-id-card"></i>
+                <input
+                  type="text"
+                  class="form-input"
+                  value="Auto-generated after registration"
+                  disabled
+                  style="opacity: 0.7"
+                />
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div class="form-group full-width">
+              <label class="form-label" for="address">
+                <i class="fas fa-map-marker-alt"></i>
+                Address
+              </label>
+              <div style="position: relative">
+                <i
+                  class="input-icon fas fa-map-marker-alt"
+                  style="top: 1.5rem"
+                ></i>
+                <textarea
+                  id="address"
+                  name="address"
+                  class="form-input form-textarea"
+                  placeholder="Enter complete address including city and postal code"
+                  required
+                  minlength="10"
+                  maxlength="500"
+                >
+<%= typeof formData !== 'undefined' ? formData.address || '' : '' %></textarea
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-user-plus"></i>
+              Register Member
+            </button>
+            <a href="/members" class="btn-secondary">
+              <i class="fas fa-arrow-left"></i>
+              Back to Members
+            </a>
+          </div>
+
+          <!-- Success Preview (Hidden by default) -->
+          <div class="success-preview" id="successPreview">
+            <div class="preview-header">
+              <i class="fas fa-check-circle"></i>
+              Member Registration Preview
+            </div>
+            <div class="preview-content" id="previewContent">
+              <!-- Dynamic content will be inserted here -->
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
-    <div>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-    </div>
-    <div>
-        <label for="phone">Phone:</label>
-        <input type="text" id="phone" name="phone" required>
-    </div>
-    <div>
-        <label for="address">Address:</label>
-        <textarea id="address" name="address" required></textarea>
-    </div>
-    <button type="submit">Add Member</button>
-</form>
+
+    <%- include('../partials/footer.ejs') %>
+
+    <script>
+      // Enhanced form validation and user experience
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("memberForm");
+        const inputs = form.querySelectorAll(".form-input");
+
+        // Real-time validation
+        inputs.forEach((input) => {
+          input.addEventListener("input", function () {
+            validateField(this);
+          });
+
+          input.addEventListener("blur", function () {
+            validateField(this);
+          });
+        });
+
+        // Validate individual field
+        function validateField(field) {
+          const value = field.value.trim();
+          const fieldName = field.name;
+
+          // Remove existing validation classes
+          field.classList.remove("error", "success");
+
+          // Skip validation for disabled fields
+          if (field.disabled) return;
+
+          let isValid = true;
+          let errorMessage = "";
+
+          switch (fieldName) {
+            case "name":
+              if (value.length < 2) {
+                isValid = false;
+                errorMessage = "Name must be at least 2 characters long";
+              } else if (!/^[a-zA-Z\s]+$/.test(value)) {
+                isValid = false;
+                errorMessage = "Name can only contain letters and spaces";
+              }
+              break;
+
+            case "email":
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!emailRegex.test(value)) {
+                isValid = false;
+                errorMessage = "Please enter a valid email address";
+              }
+              break;
+
+            case "phone":
+              const phoneRegex = /^[0-9+\-\s\(\)]{10,}$/;
+              if (!phoneRegex.test(value)) {
+                isValid = false;
+                errorMessage = "Please enter a valid phone number";
+              }
+              break;
+
+            case "address":
+              if (value.length < 10) {
+                isValid = false;
+                errorMessage = "Address must be at least 10 characters long";
+              }
+              break;
+          }
+
+          // Apply validation styling
+          if (value === "") {
+            // Empty field - neutral state
+            return;
+          } else if (isValid) {
+            field.classList.add("success");
+          } else {
+            field.classList.add("error");
+          }
+        }
+
+        // Form submission with preview
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Validate all fields
+          let isFormValid = true;
+          inputs.forEach((input) => {
+            if (!input.disabled && input.required) {
+              validateField(input);
+              if (
+                input.classList.contains("error") ||
+                input.value.trim() === ""
+              ) {
+                isFormValid = false;
+              }
+            }
+          });
+
+          if (isFormValid) {
+            // Show loading state
+            const submitBtn = form.querySelector(".btn-primary");
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML =
+              '<i class="fas fa-spinner fa-spin"></i> Registering...';
+            submitBtn.disabled = true;
+
+            // Submit form after short delay for better UX
+            setTimeout(() => {
+              form.submit();
+            }, 500);
+          } else {
+            // Scroll to first error
+            const firstError = form.querySelector(".form-input.error");
+            if (firstError) {
+              firstError.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+              firstError.focus();
+            }
+          }
+        });
+
+        // Auto-format phone number
+        const phoneInput = document.getElementById("phone");
+        phoneInput.addEventListener("input", function (e) {
+          let value = e.target.value.replace(/\D/g, "");
+          if (value.length >= 10) {
+            value = value.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+          }
+          e.target.value = value;
+        });
+
+        // Auto-capitalize name
+        const nameInput = document.getElementById("name");
+        nameInput.addEventListener("input", function (e) {
+          e.target.value = e.target.value.replace(/\b\w/g, (l) =>
+            l.toUpperCase()
+          );
+        });
+      });
+    </script>
+  </body>
+</html>

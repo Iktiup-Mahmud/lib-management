@@ -1,33 +1,765 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Issue Book</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-    <%- include('../partials/header') %>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> - FutureLib</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .issue-form-container {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      .form-section {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--shadow-glass);
+      }
+
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .section-title i {
+        color: var(--accent-primary);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .form-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      .form-input,
+      .form-select,
+      .form-textarea {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      }
+
+      .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .search-dropdown {
+        position: relative;
+      }
+
+      .dropdown-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+      }
+
+      .dropdown-item {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .dropdown-item:last-child {
+        border-bottom: none;
+      }
+
+      .item-title {
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .item-meta {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+      }
+
+      .availability-indicator {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+      }
+
+      .available {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--success);
+      }
+
+      .unavailable {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--error);
+      }
+
+      .btn-issue {
+        padding: 1rem 2rem;
+        background: var(--accent-gradient);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        width: 100%;
+      }
+
+      .btn-issue:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4);
+      }
+
+      .btn-issue:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .info-panel {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+      }
+
+      .info-title {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .info-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        color: var(--text-secondary);
+      }
+
+      .info-list i {
+        color: var(--accent-primary);
+        width: 16px;
+      }
+
+      .selected-info {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .selected-title {
+        font-weight: 700;
+        color: var(--success);
+        margin-bottom: 0.5rem;
+      }
+
+      .validation-error {
+        color: var(--error);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .issue-form-container {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/header.ejs') %>
 
     <div class="container">
-        <h1>Issue Book</h1>
-        <form action="/borrow/issue" method="POST">
-            <div class="form-group">
-                <label for="memberId">Member ID:</label>
-                <input type="text" id="memberId" name="memberId" required>
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1><i class="fas fa-book-reader"></i> <%= title %></h1>
+        <p>Issue a book to a library member with smart validation</p>
+      </div>
+
+      <% if (typeof error !== 'undefined') { %>
+      <div class="alert error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <%= error %>
+      </div>
+      <% } %>
+
+      <div class="issue-form-container">
+        <!-- Issue Form -->
+        <div class="form-section">
+          <h2 class="section-title">
+            <i class="fas fa-plus-circle"></i>
+            Book Issue Form
+          </h2>
+
+          <form id="issueForm" method="POST" action="/borrow/issue">
+            <div class="form-grid">
+              <!-- Member Selection -->
+              <div class="form-group">
+                <label class="form-label">Select Member *</label>
+                <div class="search-dropdown">
+                  <input
+                    type="text"
+                    id="memberSearch"
+                    class="form-input"
+                    placeholder="Search member by name or email..."
+                    autocomplete="off"
+                    value="<%= formData?.memberName || '' %>"
+                  />
+                  <input
+                    type="hidden"
+                    id="memberId"
+                    name="memberId"
+                    value="<%= formData?.memberId || '' %>"
+                    required
+                  />
+                  <div id="memberResults" class="dropdown-results"></div>
+                </div>
+                <div
+                  id="memberError"
+                  class="validation-error"
+                  style="display: none"
+                >
+                  <i class="fas fa-exclamation-circle"></i>
+                  Please select a valid member
+                </div>
+              </div>
+
+              <!-- Book Selection -->
+              <div class="form-group">
+                <label class="form-label">Select Book *</label>
+                <div class="search-dropdown">
+                  <input
+                    type="text"
+                    id="bookSearch"
+                    class="form-input"
+                    placeholder="Search book by title, author, or ISBN..."
+                    autocomplete="off"
+                    value="<%= formData?.bookTitle || '' %>"
+                  />
+                  <input
+                    type="hidden"
+                    id="bookId"
+                    name="bookId"
+                    value="<%= formData?.bookId || '' %>"
+                    required
+                  />
+                  <div id="bookResults" class="dropdown-results"></div>
+                </div>
+                <div
+                  id="bookError"
+                  class="validation-error"
+                  style="display: none"
+                >
+                  <i class="fas fa-exclamation-circle"></i>
+                  Please select an available book
+                </div>
+              </div>
+
+              <!-- Due Date -->
+              <div class="form-group">
+                <label class="form-label">Custom Due Date (Optional)</label>
+                <input
+                  type="date"
+                  id="dueDate"
+                  name="dueDate"
+                  class="form-input"
+                  min="<%= new Date().toISOString().split('T')[0] %>"
+                  value="<%= formData?.dueDate || '' %>"
+                />
+                <small
+                  style="
+                    color: var(--text-muted);
+                    font-size: 0.85rem;
+                    margin-top: 0.5rem;
+                  "
+                >
+                  Leave blank for default 14-day period
+                </small>
+              </div>
+
+              <!-- Priority -->
+              <div class="form-group">
+                <label class="form-label">Issue Priority</label>
+                <select name="priority" class="form-select">
+                  <option value="normal">Normal</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="reserved">Reserved</option>
+                </select>
+              </div>
+
+              <!-- Notes -->
+              <div class="form-group full-width">
+                <label class="form-label">Notes (Optional)</label>
+                <textarea
+                  name="notes"
+                  class="form-textarea"
+                  placeholder="Add any special notes about this transaction..."
+                  rows="3"
+                >
+<%= formData?.notes || '' %></textarea
+                >
+              </div>
             </div>
-            <div class="form-group">
-                <label for="bookId">Book ID:</label>
-                <input type="text" id="bookId" name="bookId" required>
+
+            <!-- Selected Information Display -->
+            <div
+              id="selectedMember"
+              class="selected-info"
+              style="display: none"
+            >
+              <div class="selected-title">Selected Member:</div>
+              <div id="memberInfo"></div>
             </div>
-            <div class="form-group">
-                <label for="issueDate">Issue Date:</label>
-                <input type="date" id="issueDate" name="issueDate" required>
+
+            <div id="selectedBook" class="selected-info" style="display: none">
+              <div class="selected-title">Selected Book:</div>
+              <div id="bookInfo"></div>
             </div>
-            <button type="submit">Issue Book</button>
-        </form>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-issue" id="submitBtn" disabled>
+              <i class="fas fa-book-reader"></i>
+              Issue Book
+            </button>
+          </form>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="form-section">
+          <div class="info-panel">
+            <h3 class="info-title">
+              <i class="fas fa-info-circle"></i>
+              Issue Guidelines
+            </h3>
+            <ul class="info-list">
+              <li>
+                <i class="fas fa-calendar"></i>
+                Default loan period is 14 days
+              </li>
+              <li>
+                <i class="fas fa-dollar-sign"></i>
+                Late returns incur $1.00 per day fine
+              </li>
+              <li>
+                <i class="fas fa-books"></i>
+                Maximum 3 books per member
+              </li>
+              <li>
+                <i class="fas fa-user-check"></i>
+                Member must be in good standing
+              </li>
+              <li>
+                <i class="fas fa-book-open"></i>
+                Book must be available for checkout
+              </li>
+              <li>
+                <i class="fas fa-bell"></i>
+                Automatic reminders sent before due date
+              </li>
+            </ul>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="info-panel" style="margin-top: 1rem">
+            <h3 class="info-title">
+              <i class="fas fa-chart-bar"></i>
+              Today's Activity
+            </h3>
+            <ul class="info-list">
+              <li>
+                <i class="fas fa-plus"></i>
+                Books issued today: <span id="todayIssued">-</span>
+              </li>
+              <li>
+                <i class="fas fa-undo"></i>
+                Books returned today: <span id="todayReturned">-</span>
+              </li>
+              <li>
+                <i class="fas fa-exclamation-triangle"></i>
+                Overdue books: <span id="overdueCount">-</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Quick Actions -->
+          <div
+            style="
+              margin-top: 1.5rem;
+              display: flex;
+              flex-direction: column;
+              gap: 0.75rem;
+            "
+          >
+            <a
+              href="/borrow/dashboard"
+              class="btn-filter"
+              style="text-align: center"
+            >
+              <i class="fas fa-chart-line"></i>
+              View Dashboard
+            </a>
+            <a
+              href="/borrow/return"
+              class="btn-filter"
+              style="text-align: center"
+            >
+              <i class="fas fa-undo"></i>
+              Return Book
+            </a>
+            <a href="/borrow/" class="btn-filter" style="text-align: center">
+              <i class="fas fa-list"></i>
+              All Transactions
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <%- include('../partials/footer') %>
-</body>
+    <%- include('../partials/footer.ejs') %>
+
+    <script>
+      let members = [];
+      let books = [];
+      let selectedMember = null;
+      let selectedBook = null;
+
+      // Load initial data
+      async function loadInitialData() {
+        try {
+          // Load members and books data for search
+          const [membersResponse, booksResponse, statsResponse] =
+            await Promise.all([
+              fetch("/api/members"),
+              fetch("/api/books/available"),
+              fetch("/borrow/api/statistics"),
+            ]);
+
+          if (membersResponse.ok) members = await membersResponse.json();
+          if (booksResponse.ok) books = await booksResponse.json();
+          if (statsResponse.ok) {
+            const stats = await statsResponse.json();
+            updateStats(stats);
+          }
+        } catch (error) {
+          console.error("Error loading initial data:", error);
+        }
+      }
+
+      // Update stats display
+      function updateStats(stats) {
+        document.getElementById("todayIssued").textContent =
+          stats.today_issued || 0;
+        document.getElementById("todayReturned").textContent =
+          stats.today_returned || 0;
+        document.getElementById("overdueCount").textContent =
+          stats.overdue_transactions || 0;
+      }
+
+      // Member search functionality
+      document
+        .getElementById("memberSearch")
+        .addEventListener("input", function () {
+          const query = this.value.toLowerCase();
+          const results = document.getElementById("memberResults");
+
+          if (query.length < 2) {
+            results.style.display = "none";
+            return;
+          }
+
+          const filteredMembers = members.filter(
+            (member) =>
+              member.name.toLowerCase().includes(query) ||
+              member.email.toLowerCase().includes(query)
+          );
+
+          if (filteredMembers.length > 0) {
+            results.innerHTML = filteredMembers
+              .map(
+                (member) => `
+                    <div class="dropdown-item" onclick="selectMember(${
+                      member.id
+                    }, '${member.name}', '${member.email}', ${
+                  member.currently_borrowed
+                })">
+                        <div class="item-title">${member.name}</div>
+                        <div class="item-meta">
+                            ${member.email} • ${
+                  member.currently_borrowed
+                } books borrowed
+                            ${
+                              member.currently_borrowed >= 3
+                                ? '<span class="availability-indicator unavailable">Limit Reached</span>'
+                                : ""
+                            }
+                        </div>
+                    </div>
+                `
+              )
+              .join("");
+            results.style.display = "block";
+          } else {
+            results.innerHTML =
+              '<div class="dropdown-item">No members found</div>';
+            results.style.display = "block";
+          }
+        });
+
+      // Book search functionality
+      document
+        .getElementById("bookSearch")
+        .addEventListener("input", function () {
+          const query = this.value.toLowerCase();
+          const results = document.getElementById("bookResults");
+
+          if (query.length < 2) {
+            results.style.display = "none";
+            return;
+          }
+
+          const filteredBooks = books.filter(
+            (book) =>
+              book.title.toLowerCase().includes(query) ||
+              book.author.toLowerCase().includes(query) ||
+              book.isbn.includes(query)
+          );
+
+          if (filteredBooks.length > 0) {
+            results.innerHTML = filteredBooks
+              .map(
+                (book) => `
+                    <div class="dropdown-item" onclick="selectBook(${
+                      book.id
+                    }, '${book.title}', '${book.author}', ${
+                  book.available_copies
+                })">
+                        <div class="item-title">${book.title}</div>
+                        <div class="item-meta">
+                            by ${book.author} • ISBN: ${book.isbn}
+                            <span class="availability-indicator ${
+                              book.available_copies > 0
+                                ? "available"
+                                : "unavailable"
+                            }">
+                                ${
+                                  book.available_copies > 0
+                                    ? `${book.available_copies} available`
+                                    : "Not available"
+                                }
+                            </span>
+                        </div>
+                    </div>
+                `
+              )
+              .join("");
+            results.style.display = "block";
+          } else {
+            results.innerHTML =
+              '<div class="dropdown-item">No books found</div>';
+            results.style.display = "block";
+          }
+        });
+
+      // Select member function
+      function selectMember(id, name, email, currentlyBorrowed) {
+        selectedMember = { id, name, email, currentlyBorrowed };
+        document.getElementById("memberSearch").value = name;
+        document.getElementById("memberId").value = id;
+        document.getElementById("memberResults").style.display = "none";
+
+        document.getElementById("memberInfo").innerHTML = `
+                <strong>${name}</strong><br>
+                ${email}<br>
+                Currently borrowed: ${currentlyBorrowed} books
+                ${
+                  currentlyBorrowed >= 3
+                    ? '<br><span style="color: var(--error);">⚠️ Member has reached borrowing limit</span>'
+                    : ""
+                }
+            `;
+        document.getElementById("selectedMember").style.display = "block";
+        document.getElementById("memberError").style.display = "none";
+
+        validateForm();
+      }
+
+      // Select book function
+      function selectBook(id, title, author, availableCopies) {
+        selectedBook = { id, title, author, availableCopies };
+        document.getElementById("bookSearch").value = title;
+        document.getElementById("bookId").value = id;
+        document.getElementById("bookResults").style.display = "none";
+
+        document.getElementById("bookInfo").innerHTML = `
+                <strong>${title}</strong><br>
+                by ${author}<br>
+                Available copies: ${availableCopies}
+                ${
+                  availableCopies <= 0
+                    ? '<br><span style="color: var(--error);">⚠️ Book is not available</span>'
+                    : ""
+                }
+            `;
+        document.getElementById("selectedBook").style.display = "block";
+        document.getElementById("bookError").style.display = "none";
+
+        validateForm();
+      }
+
+      // Form validation
+      function validateForm() {
+        const submitBtn = document.getElementById("submitBtn");
+        const memberError = document.getElementById("memberError");
+        const bookError = document.getElementById("bookError");
+
+        let isValid = true;
+
+        // Validate member selection
+        if (!selectedMember) {
+          memberError.style.display = "block";
+          isValid = false;
+        } else if (selectedMember.currentlyBorrowed >= 3) {
+          memberError.innerHTML =
+            '<i class="fas fa-exclamation-circle"></i> Member has reached maximum borrowing limit';
+          memberError.style.display = "block";
+          isValid = false;
+        } else {
+          memberError.style.display = "none";
+        }
+
+        // Validate book selection
+        if (!selectedBook) {
+          bookError.style.display = "block";
+          isValid = false;
+        } else if (selectedBook.availableCopies <= 0) {
+          bookError.innerHTML =
+            '<i class="fas fa-exclamation-circle"></i> Selected book is not available';
+          bookError.style.display = "block";
+          isValid = false;
+        } else {
+          bookError.style.display = "none";
+        }
+
+        submitBtn.disabled = !isValid;
+      }
+
+      // Hide dropdowns when clicking outside
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest(".search-dropdown")) {
+          document.getElementById("memberResults").style.display = "none";
+          document.getElementById("bookResults").style.display = "none";
+        }
+      });
+
+      // Form submission
+      document
+        .getElementById("issueForm")
+        .addEventListener("submit", function (e) {
+          if (!selectedMember || !selectedBook) {
+            e.preventDefault();
+            alert("Please select both a member and a book");
+            return;
+          }
+
+          if (selectedMember.currentlyBorrowed >= 3) {
+            e.preventDefault();
+            alert("This member has reached the maximum borrowing limit");
+            return;
+          }
+
+          if (selectedBook.availableCopies <= 0) {
+            e.preventDefault();
+            alert("This book is not available for checkout");
+            return;
+          }
+        });
+
+      // Initialize
+      loadInitialData();
+    </script>
+  </body>
 </html>

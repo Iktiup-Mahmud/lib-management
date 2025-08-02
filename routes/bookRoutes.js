@@ -29,4 +29,19 @@ router.post('/update/:id', bookController.updateBook);
 // Route to delete a book
 router.get('/delete/:id', bookController.deleteBook);
 
+// API route to get available books (for search functionality in borrow form)
+router.get('/api/books/available', async (req, res) => {
+    try {
+        const Book = require('../models/bookModel');
+        const books = await Book.getAvailableBooks();
+        res.json(books);
+    } catch (error) {
+        console.error('Error retrieving available books for API:', error);
+        res.status(500).json({ 
+            message: 'Error retrieving available books', 
+            error: error.message 
+        });
+    }
+});
+
 module.exports = router;

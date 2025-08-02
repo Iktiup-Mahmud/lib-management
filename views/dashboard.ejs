@@ -7,13 +7,13 @@
     <link rel="stylesheet" href="/css/style.css" />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
-      integrity="sha384-DyZv6Z8e+IYy6+6h6+6h6+6h6+6h6+6h6+6h6+6h6+6h6+6h6+6h6+6h6+6"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
       crossorigin="anonymous"
     />
   </head>
   <body>
-    <%- include('partials/header') %>
+    <%- include('partials/header.ejs') %>
 
     <div class="container">
       <div class="page-header">
@@ -31,28 +31,37 @@
             <i class="fas fa-book"></i>
           </div>
           <h2>Total Books</h2>
-          <p id="totalBooks"><%= stats.totalBooks || 0 %></p>
+          <p id="totalBooks">
+            <%= (stats && stats.totalBooks) ? stats.totalBooks : 0 %>
+          </p>
         </div>
         <div class="stat">
           <div class="stat-icon">
             <i class="fas fa-users"></i>
           </div>
           <h2>Active Members</h2>
-          <p id="totalMembers"><%= stats.totalMembers || 0 %></p>
+          <p id="totalMembers">
+            <%= (stats && stats.totalMembers) ? stats.totalMembers : 0 %>
+          </p>
         </div>
         <div class="stat">
           <div class="stat-icon">
             <i class="fas fa-book-reader"></i>
           </div>
           <h2>Currently Borrowed</h2>
-          <p id="currentlyBorrowed"><%= stats.currentlyBorrowed || 0 %></p>
+          <p id="currentlyBorrowed">
+            <%= (stats && stats.currentlyBorrowed) ? stats.currentlyBorrowed : 0
+            %>
+          </p>
         </div>
         <div class="stat">
           <div class="stat-icon">
             <i class="fas fa-exclamation-triangle"></i>
           </div>
           <h2>Overdue Books</h2>
-          <p id="overdueBooks"><%= stats.overdueBooks || 0 %></p>
+          <p id="overdueBooks">
+            <%= (stats && stats.overdueBooks) ? stats.overdueBooks : 0 %>
+          </p>
         </div>
         <div class="stat">
           <div class="stat-icon">
@@ -60,7 +69,8 @@
           </div>
           <h2>Total Fines</h2>
           <p id="totalFines">
-            $<%= parseFloat(stats.totalFines || 0).toFixed(2) %>
+            $<%= (stats && stats.totalFines) ?
+            parseFloat(stats.totalFines).toFixed(2) : '0.00' %>
           </p>
         </div>
         <div class="stat">
@@ -68,21 +78,27 @@
             <i class="fas fa-calendar-plus"></i>
           </div>
           <h2>Today's Borrows</h2>
-          <p id="todayBorrows"><%= stats.todayBorrows || 0 %></p>
+          <p id="todayBorrows">
+            <%= (stats && stats.todayBorrows) ? stats.todayBorrows : 0 %>
+          </p>
         </div>
         <div class="stat">
           <div class="stat-icon">
             <i class="fas fa-undo-alt"></i>
           </div>
           <h2>Today's Returns</h2>
-          <p id="todayReturns"><%= stats.todayReturns || 0 %></p>
+          <p id="todayReturns">
+            <%= (stats && stats.todayReturns) ? stats.todayReturns : 0 %>
+          </p>
         </div>
         <div class="stat">
           <div class="stat-icon">
             <i class="fas fa-chart-bar"></i>
           </div>
           <h2>Active This Month</h2>
-          <p id="activeThisMonth"><%= stats.activeThisMonth || 0 %></p>
+          <p id="activeThisMonth">
+            <%= (stats && stats.activeThisMonth) ? stats.activeThisMonth : 0 %>
+          </p>
         </div>
       </div>
 
@@ -96,6 +112,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
+            padding: 1.5rem;
           "
         >
           <a href="/books/add" class="btn btn-success">
@@ -110,27 +127,18 @@
           <a href="/borrow/return" class="btn">
             <i class="fas fa-undo"></i> Return Book
           </a>
-          <a href="/dashboard/reports/overdue" class="btn btn-danger">
+          <a href="/borrow?status=overdue" class="btn btn-danger">
             <i class="fas fa-exclamation-circle"></i> Overdue Report
           </a>
         </div>
       </div>
 
       <!-- Popular Books Section -->
-      <% if (popularBooks && popularBooks.length > 0) { %>
+      <% if (typeof popularBooks !== 'undefined' && popularBooks &&
+      popularBooks.length > 0) { %>
       <div class="card">
         <div class="card-header">
           <h3><i class="fas fa-star"></i> Most Popular Books</h3>
-        </div>
-        <div class="search-container">
-          <div style="position: relative">
-            <i class="fas fa-search search-icon"></i>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="Search popular books..."
-            />
-          </div>
         </div>
         <div class="table-container">
           <table>
@@ -157,12 +165,14 @@
             <tbody>
               <% popularBooks.forEach(book => { %>
               <tr>
-                <td><strong><%= book.title %></strong></td>
-                <td><%= book.author %></td>
+                <td><strong><%= book.title || 'N/A' %></strong></td>
+                <td><%= book.author || 'N/A' %></td>
                 <td>
-                  <span class="status borrowed"><%= book.borrow_count %></span>
+                  <span class="status borrowed"
+                    ><%= book.borrow_count || 0 %></span
+                  >
                 </td>
-                <td><%= book.currently_borrowed %></td>
+                <td><%= book.currently_borrowed || 0 %></td>
                 <td><%= Math.round(book.avg_borrow_days || 0) %> days</td>
                 <td>
                   <%= book.last_borrowed ? new
@@ -177,20 +187,11 @@
       <% } %>
 
       <!-- Recent Transactions Section -->
-      <% if (recentTransactions && recentTransactions.length > 0) { %>
+      <% if (typeof recentTransactions !== 'undefined' && recentTransactions &&
+      recentTransactions.length > 0) { %>
       <div class="card">
         <div class="card-header">
           <h3><i class="fas fa-history"></i> Recent Transactions</h3>
-        </div>
-        <div class="search-container">
-          <div style="position: relative">
-            <i class="fas fa-search search-icon"></i>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="Search transactions..."
-            />
-          </div>
         </div>
         <div class="table-container">
           <table>
@@ -213,18 +214,19 @@
             <tbody>
               <% recentTransactions.forEach(transaction => { %>
               <tr>
-                <td><strong>#<%= transaction.id %></strong></td>
-                <td><%= transaction.member_name %></td>
-                <td><%= transaction.book_title %></td>
-                <td><%= transaction.book_author %></td>
+                <td><strong>#<%= transaction.id || 'N/A' %></strong></td>
+                <td><%= transaction.member_name || 'N/A' %></td>
+                <td><%= transaction.book_title || 'N/A' %></td>
+                <td><%= transaction.book_author || 'N/A' %></td>
                 <td>
-                  <%= new Date(transaction.borrow_date).toLocaleDateString() %>
+                  <%= transaction.borrow_date ? new
+                  Date(transaction.borrow_date).toLocaleDateString() : 'N/A' %>
                 </td>
                 <td>
                   <span
-                    class="status <%= transaction.transaction_status.toLowerCase() %>"
+                    class="status <%= (transaction.transaction_status || 'unknown').toLowerCase() %>"
                   >
-                    <%= transaction.transaction_status %>
+                    <%= transaction.transaction_status || 'Unknown' %>
                   </span>
                 </td>
               </tr>
@@ -236,7 +238,8 @@
       <% } %>
 
       <!-- Monthly Statistics Chart -->
-      <% if (monthlyStats && monthlyStats.length > 0) { %>
+      <% if (typeof monthlyStats !== 'undefined' && monthlyStats &&
+      monthlyStats.length > 0) { %>
       <div class="card">
         <div class="card-header">
           <h3><i class="fas fa-chart-bar"></i> Monthly Borrowing Statistics</h3>
@@ -269,28 +272,34 @@
               <tr>
                 <td>
                   <strong
-                    ><%= stat.month_name %> <%= stat.borrow_year %></strong
+                    ><%= (stat.month_name || 'Unknown') %> <%= stat.borrow_year
+                    || '' %></strong
                   >
                 </td>
                 <td>
-                  <span class="status borrowed"><%= stat.total_borrows %></span>
+                  <span class="status borrowed"
+                    ><%= stat.total_borrows || 0 %></span
+                  >
                 </td>
                 <td>
                   <span class="status returned"
-                    ><%= stat.returned_books %></span
+                    ><%= stat.returned_books || 0 %></span
                   >
                 </td>
                 <td>
                   <span class="status available"
-                    ><%= stat.still_borrowed %></span
+                    ><%= stat.still_borrowed || 0 %></span
                   >
                 </td>
                 <td>
-                  <span class="status overdue"><%= stat.overdue_books %></span>
+                  <span class="status overdue"
+                    ><%= stat.overdue_books || 0 %></span
+                  >
                 </td>
-                <td><%= stat.unique_members %></td>
+                <td><%= stat.unique_members || 0 %></td>
                 <td>
-                  $<%= parseFloat(stat.total_fines_generated || 0).toFixed(2) %>
+                  $<%= (stat.total_fines_generated) ?
+                  parseFloat(stat.total_fines_generated).toFixed(2) : '0.00' %>
                 </td>
               </tr>
               <% }); %>
@@ -301,7 +310,8 @@
       <% } %>
 
       <!-- Genre Distribution -->
-      <% if (genreStats && genreStats.length > 0) { %>
+      <% if (typeof genreStats !== 'undefined' && genreStats &&
+      genreStats.length > 0) { %>
       <div class="card">
         <div class="card-header">
           <h3><i class="fas fa-tags"></i> Book Collection by Genre</h3>
@@ -331,20 +341,20 @@
             <tbody>
               <% genreStats.forEach(genre => { %>
               <tr>
-                <td><strong><%= genre.genre %></strong></td>
-                <td><%= genre.total_books %></td>
+                <td><strong><%= genre.genre || 'Unknown' %></strong></td>
+                <td><%= genre.total_books || 0 %></td>
                 <td>
                   <span class="status available"
-                    ><%= genre.available_copies %></span
+                    ><%= genre.available_copies || 0 %></span
                   >
                 </td>
                 <td>
                   <span class="status borrowed"
-                    ><%= genre.borrowed_copies %></span
+                    ><%= genre.borrowed_copies || 0 %></span
                   >
                 </td>
-                <td><%= genre.availability_percentage %>%</td>
-                <td><%= genre.unique_authors %></td>
+                <td><%= genre.availability_percentage || 0 %>%</td>
+                <td><%= genre.unique_authors || 0 %></td>
               </tr>
               <% }); %>
             </tbody>
@@ -363,6 +373,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
+            padding: 1.5rem;
           "
         >
           <div style="text-align: center; padding: 1rem">
@@ -422,18 +433,19 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1rem;
+            padding: 1.5rem;
           "
         >
-          <a href="/dashboard/reports/overdue" class="btn btn-danger">
+          <a href="/borrow?status=overdue" class="btn btn-danger">
             <i class="fas fa-exclamation-triangle"></i> Overdue Books
           </a>
-          <a href="/dashboard/reports/popular-books" class="btn">
+          <a href="/borrow/analytics" class="btn">
             <i class="fas fa-star"></i> Popular Books
           </a>
-          <a href="/members/reports/overdue" class="btn btn-warning">
+          <a href="/members?status=overdue" class="btn btn-warning">
             <i class="fas fa-user-clock"></i> Overdue Members
           </a>
-          <a href="/borrow/reports/popular" class="btn btn-success">
+          <a href="/borrow/analytics" class="btn btn-success">
             <i class="fas fa-trending-up"></i> Borrowing Trends
           </a>
           <a href="/borrow/current" class="btn">
@@ -452,7 +464,7 @@
       </div>
     </div>
 
-    <%- include('partials/footer') %>
+    <%- include('partials/footer.ejs') %>
     <script src="/js/main.js"></script>
   </body>
 </html>

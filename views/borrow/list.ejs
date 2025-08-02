@@ -3,38 +3,706 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Borrowing Transactions</title>
+    <title><%= title %> - FutureLib</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .transaction-controls {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-glass);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .control-input, .control-select {
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-input:focus, .control-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-filter {
+            padding: 0.75rem 1.25rem;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-filter:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-clear {
+            background: rgba(239, 68, 68, 0.8);
+        }
+
+        .btn-clear:hover {
+            background: rgba(239, 68, 68, 1);
+        }
+
+        .bulk-operations {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .bulk-operations.active {
+            display: block;
+        }
+
+        .bulk-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .bulk-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bulk-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .transaction-table {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-glass);
+        }
+
+        .table-header {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .transaction-list {
+            overflow-x: auto;
+        }
+
+        .transaction-item {
+            display: grid;
+            grid-template-columns: 40px 1fr 200px 150px 120px 100px 120px;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .transaction-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .transaction-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-member {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .transaction-dates {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .date-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .date-value {
+            color: var(--text-secondary);
+        }
+
+        .overdue-date {
+            color: var(--error);
+            font-weight: 600;
+        }
+
+        .fine-amount {
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-family: var(--font-mono);
+        }
+
+        .transaction-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn-small {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-view {
+            background: var(--info);
+        }
+
+        .btn-edit {
+            background: var(--warning);
+        }
+
+        .btn-return {
+            background: var(--success);
+        }
+
+        .action-btn-small:hover {
+            transform: scale(1.1);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .export-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.8);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: rgba(16, 185, 129, 1);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .transaction-item {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1.5rem 1rem;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .export-options {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-    <%- include('../partials/header') %>
-    
+    <%- include('../partials/header.ejs') %>
+
     <div class="container">
-        <h1>Borrowing Transactions</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Transaction ID</th>
-                    <th>Member Name</th>
-                    <th>Book Title</th>
-                    <th>Issue Date</th>
-                    <th>Return Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% transactions.forEach(transaction => { %>
-                    <tr>
-                        <td><%= transaction.id %></td>
-                        <td><%= transaction.memberName %></td>
-                        <td><%= transaction.bookTitle %></td>
-                        <td><%= transaction.issueDate.toLocaleDateString() %></td>
-                        <td><%= transaction.returnDate ? transaction.returnDate.toLocaleDateString() : 'Not Returned' %></td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-list-alt"></i> <%= title %></h1>
+            <p>Advanced transaction management with filtering and bulk operations</p>
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="transaction-controls">
+            <form method="GET" action="/borrow">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label class="control-label">Search</label>
+                        <input type="text" name="search" class="control-input" 
+                               placeholder="Search member, book, or ISBN..."
+                               value="<%= filters.search %>">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Status</label>
+                        <select name="status" class="control-select">
+                            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Transactions</option>
+                            <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+                            <option value="overdue" <%= filters.status === 'overdue' ? 'selected' : '' %>>Overdue</option>
+                            <option value="returned" <%= filters.status === 'returned' ? 'selected' : '' %>>Returned</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">From Date</label>
+                        <input type="date" name="dateFrom" class="control-input" 
+                               value="<%= filters.dateFrom %>">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">To Date</label>
+                        <input type="date" name="dateTo" class="control-input" 
+                               value="<%= filters.dateTo %>">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Member</label>
+                        <select name="memberId" class="control-select">
+                            <option value="">All Members</option>
+                            <% if (members) { %>
+                                <% members.forEach(member => { %>
+                                <option value="<%= member.id %>" <%= filters.memberId == member.id ? 'selected' : '' %>>
+                                    <%= member.name %>
+                                </option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Sort By</label>
+                        <select name="sortBy" class="control-select">
+                            <option value="borrow_date" <%= filters.sortBy === 'borrow_date' ? 'selected' : '' %>>Issue Date</option>
+                            <option value="due_date" <%= filters.sortBy === 'due_date' ? 'selected' : '' %>>Due Date</option>
+                            <option value="return_date" <%= filters.sortBy === 'return_date' ? 'selected' : '' %>>Return Date</option>
+                            <option value="member_name" <%= filters.sortBy === 'member_name' ? 'selected' : '' %>>Member Name</option>
+                            <option value="book_title" <%= filters.sortBy === 'book_title' ? 'selected' : '' %>>Book Title</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <div class="filter-buttons">
+                        <button type="submit" class="btn-filter">
+                            <i class="fas fa-filter"></i>
+                            Apply Filters
+                        </button>
+                        <a href="/borrow" class="btn-filter btn-clear">
+                            <i class="fas fa-times"></i>
+                            Clear
+                        </a>
+                    </div>
+                    <div class="export-options">
+                        <a href="/borrow/export?format=csv&<%= new URLSearchParams(filters).toString() %>" class="export-btn">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </a>
+                        <a href="/borrow/export?format=excel&<%= new URLSearchParams(filters).toString() %>" class="export-btn">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </a>
+                        <a href="/borrow/export?format=pdf&<%= new URLSearchParams(filters).toString() %>" class="export-btn">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bulk Operations Panel -->
+        <div class="bulk-operations" id="bulkOperations">
+            <div class="bulk-header">
+                <h3 class="bulk-title">
+                    <i class="fas fa-tasks"></i>
+                    Bulk Operations (<span id="selectedCount">0</span> selected)
+                </h3>
+                <button onclick="closeBulkOperations()" class="btn-filter btn-clear">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="bulk-actions">
+                <button onclick="showBulkModal('extend_due_date')" class="btn-filter">
+                    <i class="fas fa-calendar-plus"></i>
+                    Extend Due Date
+                </button>
+                <button onclick="showBulkModal('add_notes')" class="btn-filter">
+                    <i class="fas fa-sticky-note"></i>
+                    Add Notes
+                </button>
+                <button onclick="confirmBulkAction('send_reminders')" class="btn-filter">
+                    <i class="fas fa-bell"></i>
+                    Send Reminders
+                </button>
+                <button onclick="confirmBulkAction('waive_fines')" class="btn-filter">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Waive Fines
+                </button>
+            </div>
+        </div>
+
+        <!-- Transaction Table -->
+        <div class="transaction-table">
+            <div class="table-header">
+                <h3 class="table-title">
+                    <i class="fas fa-exchange-alt"></i>
+                    Transactions
+                    <% if (pagination) { %>
+                        (<%= pagination.totalRecords %> total)
+                    <% } %>
+                </h3>
+                <div class="table-actions">
+                    <button onclick="selectAllTransactions()" class="btn-filter">
+                        <i class="fas fa-check-double"></i>
+                        Select All
+                    </button>
+                    <a href="/borrow/dashboard" class="btn-filter">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="transaction-list">
+                <% if (transactions && transactions.length > 0) { %>
+                    <% transactions.forEach(transaction => { %>
+                    <div class="transaction-item" data-id="<%= transaction.id %>">
+                        <div class="transaction-checkbox">
+                            <input type="checkbox" class="transaction-select" value="<%= transaction.id %>"
+                                   onchange="updateBulkOperations()">
+                        </div>
+                        <div class="transaction-info">
+                            <div class="transaction-title">
+                                <%= transaction.book_title %>
+                                <% if (transaction.book_author) { %>
+                                    <span style="font-weight: normal; color: var(--text-secondary);">
+                                        by <%= transaction.book_author %>
+                                    </span>
+                                <% } %>
+                            </div>
+                            <div class="transaction-member">
+                                <i class="fas fa-user"></i> <%= transaction.member_name %>
+                                <% if (transaction.member_email) { %>
+                                    • <%= transaction.member_email %>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="transaction-dates">
+                            <div>
+                                <span class="date-label">Issued</span><br>
+                                <span class="date-value">
+                                    <%= new Date(transaction.borrow_date).toLocaleDateString() %>
+                                </span>
+                            </div>
+                            <div>
+                                <span class="date-label">Due</span><br>
+                                <span class="date-value <%= transaction.status === 'OVERDUE' ? 'overdue-date' : '' %>">
+                                    <%= new Date(transaction.due_date).toLocaleDateString() %>
+                                    <% if (transaction.days_overdue > 0) { %>
+                                        <br><small>(+<%= transaction.days_overdue %> days)</small>
+                                    <% } %>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="transaction-dates">
+                            <span class="date-label">Returned</span><br>
+                            <span class="date-value">
+                                <%= transaction.return_date ? new Date(transaction.return_date).toLocaleDateString() : 'Not returned' %>
+                            </span>
+                        </div>
+                        <div class="status <%= transaction.status.toLowerCase() %>">
+                            <%= transaction.status %>
+                        </div>
+                        <div class="fine-amount">
+                            $<%= (transaction.fine_amount || 0).toFixed(2) %>
+                        </div>
+                        <div class="transaction-actions">
+                            <button onclick="viewTransaction(<%= transaction.id %>)" 
+                                    class="action-btn-small btn-view" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <% if (transaction.status !== 'RETURNED') { %>
+                            <button onclick="returnBook(<%= transaction.id %>)" 
+                                    class="action-btn-small btn-return" title="Return Book">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                            <% } %>
+                        </div>
+                    </div>
+                    <% }) %>
+                <% } else { %>
+                    <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <h3>No transactions found</h3>
+                        <p>Try adjusting your search criteria or <a href="/borrow/issue">issue a new book</a></p>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Pagination -->
+            <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="pagination">
+                <div class="pagination-info">
+                    Showing <%= Math.min((pagination.currentPage - 1) * 20 + 1, pagination.totalRecords) %> 
+                    to <%= Math.min(pagination.currentPage * 20, pagination.totalRecords) %> 
+                    of <%= pagination.totalRecords %> transactions
+                </div>
+                <div class="pagination-controls">
+                    <% if (pagination.hasPrev) { %>
+                        <a href="?<%= new URLSearchParams({...filters, page: pagination.currentPage - 1}).toString() %>" 
+                           class="page-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    <% } %>
+                    
+                    <% for (let i = Math.max(1, pagination.currentPage - 2); i <= Math.min(pagination.totalPages, pagination.currentPage + 2); i++) { %>
+                        <a href="?<%= new URLSearchParams({...filters, page: i}).toString() %>" 
+                           class="page-btn <%= i === pagination.currentPage ? 'active' : '' %>">
+                            <%= i %>
+                        </a>
+                    <% } %>
+                    
+                    <% if (pagination.hasNext) { %>
+                        <a href="?<%= new URLSearchParams({...filters, page: pagination.currentPage + 1}).toString() %>" 
+                           class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+            <% } %>
+        </div>
     </div>
 
-    <%- include('../partials/footer') %>
+    <%- include('../partials/footer.ejs') %>
+
+    <script>
+        // Bulk operations functionality
+        function updateBulkOperations() {
+            const checkboxes = document.querySelectorAll('.transaction-select:checked');
+            const count = checkboxes.length;
+            const bulkPanel = document.getElementById('bulkOperations');
+            const countSpan = document.getElementById('selectedCount');
+            
+            countSpan.textContent = count;
+            
+            if (count > 0) {
+                bulkPanel.classList.add('active');
+            } else {
+                bulkPanel.classList.remove('active');
+            }
+        }
+
+        function selectAllTransactions() {
+            const checkboxes = document.querySelectorAll('.transaction-select');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+            
+            updateBulkOperations();
+        }
+
+        function closeBulkOperations() {
+            document.querySelectorAll('.transaction-select').forEach(cb => cb.checked = false);
+            updateBulkOperations();
+        }
+
+        function getSelectedTransactionIds() {
+            return Array.from(document.querySelectorAll('.transaction-select:checked'))
+                       .map(cb => cb.value);
+        }
+
+        async function confirmBulkAction(action) {
+            const ids = getSelectedTransactionIds();
+            if (ids.length === 0) return;
+
+            const actionNames = {
+                'send_reminders': 'send reminders for',
+                'waive_fines': 'waive fines for'
+            };
+
+            if (confirm(`Are you sure you want to ${actionNames[action]} ${ids.length} transaction(s)?`)) {
+                await performBulkAction(action, ids);
+            }
+        }
+
+        function showBulkModal(action) {
+            const ids = getSelectedTransactionIds();
+            if (ids.length === 0) return;
+
+            if (action === 'extend_due_date') {
+                const newDate = prompt('Enter new due date (YYYY-MM-DD):');
+                if (newDate) {
+                    performBulkAction(action, ids, { newDueDate: newDate });
+                }
+            } else if (action === 'add_notes') {
+                const notes = prompt('Enter notes to add:');
+                if (notes) {
+                    performBulkAction(action, ids, { notes });
+                }
+            }
+        }
+
+        async function performBulkAction(action, transactionIds, data = {}) {
+            try {
+                const response = await fetch('/borrow/bulk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action,
+                        transactionIds,
+                        data
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error performing bulk operation: ' + error.message);
+            }
+        }
+
+        function viewTransaction(id) {
+            window.location.href = `/borrow/transaction/${id}`;
+        }
+
+        function returnBook(id) {
+            if (confirm('Return this book?')) {
+                window.location.href = `/borrow/return?transactionId=${id}`;
+            }
+        }
+
+        // Auto-submit form on filter changes
+        document.querySelectorAll('.control-select').forEach(select => {
+            select.addEventListener('change', function() {
+                this.form.submit();
+            });
+        });
+    </script>
 </body>
 </html>

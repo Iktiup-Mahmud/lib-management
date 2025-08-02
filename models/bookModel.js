@@ -96,10 +96,19 @@ const Book = {
         });
     },
 
-    // Get available books using view
+    // Get available books for issuing
     getAvailable: () => {
         return new Promise((resolve, reject) => {
-            const query = 'SELECT * FROM vw_available_books ORDER BY title';
+            const query = `
+                SELECT 
+                    b.*,
+                    (b.available_copies - COUNT(CASE WHEN bt.return_date IS NULL THEN 1 ELSE 0 END)) as actual_available
+                FROM books b
+                LEFT JOIN borrow_transactions bt ON b.id = bt.book_id
+                GROUP BY b.id
+                HAVING actual_available > 0
+                ORDER BY b.title
+            `;
             db.query(query, (error, results) => {
                 if (error) return reject(error);
                 resolve(results);

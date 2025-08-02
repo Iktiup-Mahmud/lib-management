@@ -26,6 +26,27 @@ app.use(session({
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// API routes for AJAX requests
+app.get('/api/members', async (req, res) => {
+    try {
+        const Member = require('./models/memberModel');
+        const members = await Member.getAll();
+        res.json(members);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/books/available', async (req, res) => {
+    try {
+        const Book = require('./models/bookModel');
+        const books = await Book.getAvailable();
+        res.json(books);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Routes
 app.use('/books', bookRoutes);
 app.use('/members', memberRoutes);

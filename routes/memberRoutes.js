@@ -23,6 +23,21 @@ router.post('/update/:id', memberController.updateMember);
 // Route to delete a member
 router.get('/delete/:id', memberController.deleteMember);
 
+// API route to get all members (for search functionality)
+router.get('/api/members', async (req, res) => {
+    try {
+        const Member = require('../models/memberModel');
+        const members = await Member.getAll();
+        res.json(members);
+    } catch (error) {
+        console.error('Error retrieving members for API:', error);
+        res.status(500).json({ 
+            message: 'Error retrieving members', 
+            error: error.message 
+        });
+    }
+});
+
 // Route for overdue members report
 router.get('/reports/overdue', memberController.getOverdueMembers);
 
